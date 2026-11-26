@@ -1,0 +1,40 @@
+# Caddy is the only public gateway. It terminates TLS, obtains certificates
+# automatically, and is the only process allowed to rewrite client/proxy headers.
+{
+	admin off
+	servers {
+		# Only 80/tcp and 443/tcp are published; HTTP/3 over UDP is disabled.
+		protocols h1 h2
+	}
+}
+
+{$DOMAIN} {
+	tls /etc/letsencrypt/live/{$DOMAIN}/fullchain.pem /etc/letsencrypt/live/{$DOMAIN}/privkey.pem
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	# Overwrite, do not append, client-supplied forwarding headers. nginx trusts
+	# X-Forwarded-For from private networks and uses REMOTE_ADDR from this value.
+	reverse_proxy web:80 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-Port 443
+	}
+
+	log {
+		output stderr
+		format console
+	}
+}
+
+www.{$DOMAIN} {
+	tls /etc/letsencrypt/live/{$DOMAIN}/fullchain.pem /etc/letsencrypt/live/{$DOMAIN}/privkey.pem
+	redir https://{$DOMAIN}{uri} permanent
+}

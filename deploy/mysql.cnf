@@ -1,0 +1,19 @@
+# Small production MySQL 8.4 LTS profile for a 956 MB / 1 CPU host.
+# These are server settings only; the data directory stays in the named volume.
+[mysqld]
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+default-time-zone = '+00:00'
+
+innodb_buffer_pool_size = 64M
+innodb_log_buffer_size = 8M
+innodb_redo_log_capacity = 64M
+
+max_connections = 20
+performance_schema = OFF
+mysqlx = OFF
+
+tmp_table_size = 16M
+max_heap_table_size = 16M
+table_open_cache = 200
+table_definition_cache = 400
