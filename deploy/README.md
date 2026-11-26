@@ -110,7 +110,7 @@ docker compose --env-file .env.production -f deploy/compose.production.yml \
 
 ## 4. DNS и HTTPS
 
-- Создайте `A`-записи для `24kilb.ru` и `www.24kilb.ru` на публичный IPv4
+- Создайте `A`-записи для `example.com` и `www.example.com` на публичный IPv4
   сервера.
 - `AAAA` добавляйте только если IPv6 на сервере реально работает и открыт
   снаружи. Иначе Let's Encrypt может выбрать IPv6 и не пройти проверку.
@@ -178,12 +178,12 @@ docker run --rm -e DOMAIN=example.com \
 
 ## Сертификат через DNS TXT
 
-Текущий Caddyfile читает сертификат `24kilb.ru` из `/etc/letsencrypt` на сервере (read-only mount). Перед запуском Caddy выполните:
+Текущий Caddyfile читает сертификат `example.com` из `/etc/letsencrypt` на сервере (read-only mount). Перед запуском Caddy выполните:
 
 ```bash
 certbot certonly --manual --preferred-challenges dns --agree-tos \
-  --register-unsafely-without-email --cert-name 24kilb.ru \
-  -d 24kilb.ru -d www.24kilb.ru
+  --register-unsafely-without-email --cert-name example.com \
+  -d example.com -d www.example.com
 ```
 
 Добавьте предложенные TXT и дождитесь проверки. Ручной DNS challenge не поддерживает автоматическое продление без DNS API/hook. До истечения сертификата повторите выпуск с новыми TXT и перезапустите только Caddy. Старые challenge TXT после успешного выпуска можно удалить. Неверная AAAA продолжает направлять IPv6-клиентов на другой сервер даже с действующим сертификатом.
