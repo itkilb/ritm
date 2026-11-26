@@ -1,0 +1,64 @@
+# OS / IDE
+.DS_Store
+.idea/
+*.iml
+*.swp
+
+# Environment files (keep only the example)
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Agents
+AGENTS.md
+SPEC.md
+
+# Local DSH runtime state
+/.dsh-home/
+
+# Docs (keep images only)
+/docs/*
+!/docs/images/
+!/docs/images/**
+
+# Backend
+backend/vendor/
+backend/node_modules/
+backend/.phpunit.cache/
+backend/.phpunit.result.cache
+backend/.php-cs-fixer.cache
+backend/phpstan_cache/
+backend/psalm_cache/
+backend/storage/*.key
+backend/storage/logs/*
+!backend/storage/logs/.gitkeep
+backend/storage/framework/cache/*
+!backend/storage/framework/cache/.gitkeep
+backend/storage/framework/sessions/*
+!backend/storage/framework/sessions/.gitkeep
+backend/storage/framework/views/*
+!backend/storage/framework/views/.gitkeep
+backend/storage/framework/testing/*
+!backend/storage/framework/testing/.gitkeep
+backend/bootstrap/cache/*.php
+backend/public/uploads/
+backend/public/storage/
+backend/coverage/
+backend/_ide_helper*.php
+backend/.phpstorm.meta.php
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/*.local
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+frontend/coverage/
+*.tsbuildinfo
+
+# Docker / logs
+*.log
+docker-compose.override.yml

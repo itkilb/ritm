@@ -1,0 +1,96 @@
+services:
+  mysql:
+    image: mysql:8.0.40
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ritm_root_local_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-ritm}
+      MYSQL_USER: ${MYSQL_USER:-ritm}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-ritm_local_password}
+      TZ: UTC
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      args:
+        INSTALL_DEV_DEPS: ${INSTALL_DEV_DEPS:-true}
+    restart: unless-stopped
+    environment:
+      APP_NAME: ${APP_NAME:-Ritm}
+      APP_ENV: ${APP_ENV:-local}
+      APP_KEY: ${APP_KEY:-}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      API_URL: ${API_URL:-http://localhost}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      APP_TIMEZONE: ${APP_TIMEZONE:-UTC}
+      APP_LOCALE: ru
+      APP_FALLBACK_LOCALE: en
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      HOME: /tmp
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${MYSQL_DATABASE:-ritm}
+      DB_USERNAME: ${MYSQL_USER:-ritm}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-ritm_local_password}
+      DB_CHARSET: utf8mb4
+      DB_COLLATION: utf8mb4_unicode_ci
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      SESSION_LIFETIME: ${SESSION_LIFETIME:-120}
+      SESSION_ENCRYPT: ${SESSION_ENCRYPT:-false}
+      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-false}
+      SESSION_HTTP_ONLY: "true"
+      SESSION_SAME_SITE: ${SESSION_SAME_SITE:-lax}
+      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-localhost,localhost:8080,127.0.0.1,127.0.0.1:8080}
+      QUEUE_CONNECTION: database
+      HASH_ID: "true"
+      HASH_ID_KEY: ${HASH_ID_KEY:-apiato}
+      GLOBAL_API_RATE_LIMITER_ENABLED: ${GLOBAL_API_RATE_LIMITER_ENABLED:-true}
+      GLOBAL_API_RATE_LIMITER_ATTEMPTS_PER_MIN: ${GLOBAL_API_RATE_LIMITER_ATTEMPTS_PER_MIN:-30}
+      GLOBAL_API_RATE_LIMITER_EXPIRES_IN_MIN: ${GLOBAL_API_RATE_LIMITER_EXPIRES_IN_MIN:-1}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    expose:
+      - "9000"
+    volumes:
+      - backend_storage:/var/www/html/storage
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_started
+
+volumes:
+  mysql_data:
+    name: ${MYSQL_VOLUME_NAME:-ritm_mysql_data}
+  backend_storage:
+    name: ${BACKEND_STORAGE_VOLUME_NAME:-ritm_backend_storage}

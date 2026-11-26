@@ -1,0 +1,34 @@
+.git
+.gitignore
+.idea
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+
+**/.DS_Store
+
+# Never bake dependencies or build output into the images.
+backend/vendor
+# Apiato installs the documentation container into app/Containers/Vendor
+# during composer install; local copies must not enter the build context.
+backend/app/Containers/Vendor
+backend/node_modules
+backend/.phpunit.cache
+backend/.php-cs-fixer.cache
+backend/phpstan_cache
+backend/psalm_cache
+backend/bootstrap/cache/*.php
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/storage/framework/testing/*
+backend/storage/*.key
+
+frontend/node_modules
+frontend/dist
+frontend/.vite
+
+**/*.log
